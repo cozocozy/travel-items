@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 const initialItems = [
-  { id: 1, description: "Passport", quantity: 2, packed: false },
+  { id: 1, description: "Passport", quantity: 2, packed: true },
   { id: 2, description: "Socks", quantity: 10, packed: true },
   { id: 3, description: "Charger", quantity: 1, packed: false },
 ];
@@ -17,11 +17,22 @@ function App() {
     setItems((items) => items.filter((items) => items.id !== id));
   }
 
+  function handleToogleItems(id) {
+    setItems((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, packed: !item.packed } : item
+      )
+    );
+  }
   return (
     <div className="App">
       <Logo />
       <Form onAddItems={handleAddItems} />
-      <PackingList items={items} onDeleteItems={handleDeleteItems} />
+      <PackingList
+        items={items}
+        onDeleteItems={handleDeleteItems}
+        onToogleItems={handleToogleItems}
+      />
       <Stats />
     </div>
   );
@@ -69,22 +80,32 @@ function Form({ onAddItems }) {
   );
 }
 
-function PackingList({ items, onDeleteItems }) {
+function PackingList({ items, onDeleteItems, onToogleItems }) {
   return (
     <div className="list">
       <ul>
         {items.map((item) => (
-          <Item item={item} onDeleteItems={onDeleteItems} key={item.id} />
+          <Item
+            item={item}
+            onDeleteItems={onDeleteItems}
+            onToogleItems={onToogleItems}
+            key={item.id}
+          />
         ))}
       </ul>
     </div>
   );
 }
 
-function Item({ item, onDeleteItems }) {
+function Item({ item, onDeleteItems, onToogleItems }) {
   return (
     <li>
-      <span style={{ textDecoration: item.packed ? "line-through" : "none" }}>
+      <input
+        type="checkbox"
+        checked={item.packed}
+        onChange={() => onToogleItems(item.id)}
+      />
+      <span style={item.packed ? { textDecoration: "line-through" } : {}}>
         {item.quantity} {item.description}
       </span>
       <button onClick={() => onDeleteItems(item.id)}>❌</button>
