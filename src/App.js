@@ -14,10 +14,10 @@ function App() {
   }
 
   function handleDeleteItems(id) {
-    setItems((items) => items.filter((items) => items.id !== id));
+    setItems((items) => items.filter((item) => item.id !== id));
   }
 
-  function handleToogleItems(id) {
+  function handleToggleItems(id) {
     setItems((items) =>
       items.map((item) =>
         item.id === id ? { ...item, packed: !item.packed } : item
@@ -31,7 +31,7 @@ function App() {
       <PackingList
         items={items}
         onDeleteItems={handleDeleteItems}
-        onToogleItems={handleToogleItems}
+        onToogleItems={handleToggleItems}
       />
       <Stats items={items} />
     </div>
@@ -46,7 +46,12 @@ function Logo() {
 function Form({ onAddItems }) {
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState(1);
-
+  const handleChange = (e) => {
+    const capitalized =
+      e.target.value.charAt(0).toUpperCase() +
+      e.target.value.slice(1).toLowerCase();
+    setDescription(capitalized);
+  };
   function handleSubmit(e) {
     e.preventDefault();
     if (!description) return;
@@ -72,7 +77,7 @@ function Form({ onAddItems }) {
         type="text"
         placeholder="Item..."
         value={description}
-        onChange={(e) => setDescription(e.target.value)}
+        onChange={handleChange}
       />
       <button>Add</button>
     </form>
@@ -80,10 +85,24 @@ function Form({ onAddItems }) {
 }
 
 function PackingList({ items, onDeleteItems, onToogleItems }) {
+  const [sortBy, setSortBy] = useState("input");
+
+  let sortedItems;
+
+  if (sortBy === "input") sortedItems = items;
+  if (sortBy === "description")
+    sortedItems = items
+      .slice()
+      .sort((a, b) => a.description.localeCompare(b.description));
+  if (sortBy === "packed")
+    sortedItems = items
+      .slice()
+      .sort((a, b) => Number(a.packed) - Number(b.packed));
+
   return (
     <div className="list">
       <ul>
-        {items.map((item) => (
+        {sortedItems.map((item) => (
           <Item
             item={item}
             onDeleteItems={onDeleteItems}
@@ -92,6 +111,16 @@ function PackingList({ items, onDeleteItems, onToogleItems }) {
           />
         ))}
       </ul>
+
+      <div className="actions">
+        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+          <option value="input">Sort by input</option>
+
+          <option value="description">Sort by description</option>
+
+          <option value="packed">Sort by packed status</option>
+        </select>
+      </div>
     </div>
   );
 }
@@ -104,7 +133,7 @@ function Item({ item, onDeleteItems, onToogleItems }) {
         checked={item.packed}
         onChange={() => onToogleItems(item.id)}
       />
-      <span style={item.packed ? { textDecoration: "line-through" } : {}}>
+      <span className={item.packed ? "packed" : ""}>
         {item.quantity} {item.description}
       </span>
       <button onClick={() => onDeleteItems(item.id)}>❌</button>
