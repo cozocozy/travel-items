@@ -34,7 +34,7 @@ function App() {
       <PackingList
         items={items}
         onDeleteItems={handleDeleteItems}
-        onToggleItems={handleToggleItems}
+        onToogleItems={handleToggleItems}
         onClearList={handleClearList}
       />
       <Stats items={items} />
